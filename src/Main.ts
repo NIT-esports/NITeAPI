@@ -18,7 +18,7 @@ function doPost(e: any) {
   const postdata = JSON.parse(e.postData.contents);
   if (postdata.id && postdata.nickname) {
     if (MembersList.search(postdata.id)) {
-      MembersList.update(new DiscordData(postdata.id, postdata.nickname));
+      MembersList.update(new Discord(postdata.id, postdata.nickname));
     } else {
       const spreadsheet = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("NAME_LIST_SHEET_ID"));
       spreadsheet.appendRow(["", "", "", "", "", "", "", postdata.id, postdata.nickname]);

@@ -1,5 +1,5 @@
 class MembersList {
-  static search(target: string) {
+  static search(target: string): Member {
     const index = this.indexOf(target);
     if (index == -1) {
       return null;
@@ -11,12 +11,12 @@ class MembersList {
     const title = JSON.parse(cache.get(Cache.KEY.title));
     const id: number = Number.parseInt(memberData[0]);
     const name: string = memberData[1];
-    const discord = new DiscordData(discordData[0], discordData[1]);
+    const discord = new Discord(discordData[0], discordData[1]);
     const games:Game[] = [];
     for(let i = 0; i < title.length; i++) {
       games.push(new Game(title[i], gameData[i]));
     }
-    return new MemberData(id, name, discord, games);
+    return new Member(id, name, discord, games);
   }
 
   static indexOf(id: string | number): number {
@@ -26,7 +26,7 @@ class MembersList {
     return _.zip.apply(_, values)[0].indexOf(id.toString());
   }
 
-  static update(newData: DiscordData) {
+  static update(newData: Discord) {
     const index = MembersList.indexOf(newData.id);
     if (index != -1) {
       const id = PropertiesService.getScriptProperties().getProperty("NAME_LIST_SHEET_ID");
