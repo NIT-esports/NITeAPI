@@ -1,6 +1,8 @@
-const _ = Underscore.load();
+function makeCache() {
+  Cache.make();
+}
 
-function toJson(data) {
+function toJson(data: any) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
