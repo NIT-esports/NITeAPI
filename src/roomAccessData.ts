@@ -1,6 +1,11 @@
 const WEEKS = ["日", "月", "火", "水", "木", "金", "土"];
 
 class RoomAccessData {
+  room: any;
+  member: any;
+  type: any;
+  timestamp: Date;
+  
   constructor(room, member, type) {
     this.room = room;
     this.member = member;

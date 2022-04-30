@@ -1,5 +1,10 @@
 class Room {
-  constructor(campus) {
+  _sheet: GoogleAppsScript.Spreadsheet.Sheet;
+  _values: any[][];
+  campus: string;
+  inmates: any;
+  
+  constructor(campus: string) {
     const id = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
     const spreadsheet = SpreadsheetApp.openById(id);
     const range = spreadsheet.getRangeByName(campus == "小波瀬" ? "Obase" : "Kokura");
@@ -18,18 +23,6 @@ class Room {
     return {
       campus: this.campus,
       inmates: this.inmates
-      /*      
-      .map((inmate) => {
-        return {
-          id: inmate.id,
-          name: inmate.name,
-          discord: {
-            id: inmate.discord.id,
-            nickname: inmate.discord.nickname,
-          }
-        }
-      })
-      */
     };
   }
 
