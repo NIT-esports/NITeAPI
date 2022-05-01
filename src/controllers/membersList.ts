@@ -1,4 +1,6 @@
-class MembersList {
+import { Member, Discord, Game } from "../models";
+
+export class MembersList {
   static tryFind(target: string): Member {
     const index = MembersList.indexOf(target);
     const cache = Cache.getOrMake();

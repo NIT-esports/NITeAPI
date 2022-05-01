@@ -1,0 +1,101 @@
+@startuml
+package models
+{
+    class AccessInfo
+    {
+        +<<readonly>>room: RoomInfo
+        +<<readonly>>member: Member
+        +<<readonly>>type: AccessType
+        +<<readonly>>time: Date
+    }
+    enum AccessType
+    {
+        ENTRY,
+        EXIT
+    }
+    class Discord
+    {
+        +<<readonly>>id: string
+        +<<readonly>>nickname: string
+    }
+    class Game
+    {
+        +<<readonly>>title: string
+        +<<readonly>>id: string
+    }
+    class Member
+    {
+        +<<readonly>>id: number
+        +<<readonly>>name: string
+        +<<readonly>>discord: Discord
+        +<<readonly>>games: Game[]
+    }
+    interface Responce
+    {
+        +toJSON(): object
+    }
+    class Result
+    {
+        +<<readonly>>state: ResultState
+        +<<readonly>>message: string
+        +<<readonly>>data: Responce
+    }
+    enum ResultState
+    {
+        SUCCESS,
+        FAILED
+    }
+    class Room
+    {
+        +<<readonly>>info: RoomInfo
+        +<<readonly>>inmates: Member[]
+        +entry(member: Member): void
+        +exit(member: Member): void
+    }
+    class RoomInfo
+    {
+        +<<readonly>>campus: string
+        +<<readonly>>name: string
+    }
+}
+package controllers
+{
+    class MembersList
+    {
+
+    }
+    class RoomAccessLogger
+    {
+        +{static}log(context: AccessInfo): void
+    }
+}
+package utils
+{
+    package extensions
+    {
+        class Date
+        {
+            +{static}getDayToJapanese(): string
+        }
+        class String
+        {
+            +{static}insertAt(index: number, context: string): string
+        }
+    }
+}
+
+Member ..|> Responce
+Room ..|> Responce
+
+Member "1" *-- "1" Discord
+Member "1" *-- "*" Game
+Room "1" *-- "1" RoomInfo
+Room "1" *-- "*" Member
+Result "1" *-- "1" Responce
+
+AccessInfo --> Date
+MembersList --> Member
+Room --> String
+RoomAccessLogger --> AccessInfo
+
+@enduml

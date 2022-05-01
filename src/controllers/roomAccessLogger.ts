@@ -1,7 +1,7 @@
-import { Log } from ".";
+import { AccessInfo } from "../models";
 
-export class Logger {
-  static write(content: Log) {
+export class RoomAccessLogger {
+  static log(content: AccessInfo) {
     const id = PropertiesService.getScriptProperties().getProperty("LOG_SHEET_ID");
     const spreadsheet = SpreadsheetApp.openById(id);
     const sheet = spreadsheet.getSheets()[0];

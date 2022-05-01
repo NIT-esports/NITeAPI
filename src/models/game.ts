@@ -1,4 +1,4 @@
-class Game {
+export class Game {
   readonly title: string;
   readonly id: string;
 

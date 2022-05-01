@@ -1,6 +1,6 @@
 export class Discord {
-    id: string;
-    nickname: string;
+    readonly id: string;
+    readonly nickname: string;
 
     constructor(id: string, nickname: string) {
         this.id = id;

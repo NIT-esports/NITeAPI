@@ -1,9 +1,13 @@
+import { Responce, ResultState } from ".";
+
 export class Result {
-  state: string;
-  message: string;
+  readonly state: ResultState;
+  readonly message: string;
+  readonly data: Responce
   
-  constructor(state: string, message: string) {
+  constructor(state: ResultState, message: string, data: Responce) {
     this.state = state;
     this.message = message;
+    this.data = data;
   }
 }

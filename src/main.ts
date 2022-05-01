@@ -1,5 +1,5 @@
-import { Result } from "./models";
-import { AccessInfo, Room } from "./models/rooms";
+import { MembersList, RoomAccessLogger } from "./controllers";
+import { AccessInfo, AccessType, Discord, Member, Result, ResultState, Room, RoomInfo } from "./models";
 
 function toJson(data: any) {
   return ContentService.createTextOutput(JSON.stringify(data))
@@ -34,15 +34,18 @@ function doPost(e: any) {
       const member = new Member(0, "", discord, []);
       MembersList.regist(member);
     }
-  } else {
-    let accessInfo: AccessInfo;
-    try {
-      accessInfo = AccessInfo.parse(e.postData.contents);
-    } catch (e) {
-      return toJson(new Result("ERROR", "型情報が違います"));
+  } else if(postdata.room.name && postdata.type && postdata.member.id) {
+    const roomInfo = new RoomInfo(postdata.room.name)
+    const member = MembersList.tryFind(postdata.member.id);
+    const type = postdata.type == AccessType.ENTRY ? AccessType.ENTRY : AccessType.EXIT;
+    const accessInfo = new AccessInfo(roomInfo, member, type);
+    const room = new Room(postdata.room.name);
+    if(postdata.type == AccessType.ENTRY) {
+      room.entry(member)
+    } else {
+      room.exit(member);
     }
-    const room = new Room(accessInfo.room.name);
-    room.access(accessInfo);
-    return toJson(new Result("SUCCESS", ""));
+    RoomAccessLogger.log(accessInfo);
+    return toJson(new Result(ResultState.SUCCESS, ""));
   }
 }
