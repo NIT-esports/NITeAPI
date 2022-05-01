@@ -13,12 +13,15 @@ function makeCache() {
 function doGet(e: any) {
   const query = e.parameter;
   if (query.id) {
-    const data = MembersList.tryFind(query.id);
-    return toJson(data);
+    const member = MembersList.tryFind(query.id);
+    if(member) {
+      return toJson(new Result(ResultState.SUCCESS, "", member));
+    }
+    return toJson(new Result(ResultState.FAILED, "No member with that ID was found.", null));
   }
-  if (query.name) {
+  else if (query.name) {
     const room = new Room(query.name);
-    return toJson(room);
+    return toJson(new Result(ResultState.SUCCESS, "", room));
   } else {
     return toJson(null);
   }
@@ -46,6 +49,5 @@ function doPost(e: any) {
       room.exit(member);
     }
     RoomAccessLogger.log(accessInfo);
-    return toJson(new Result(ResultState.SUCCESS, ""));
   }
 }

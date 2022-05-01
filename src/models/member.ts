@@ -1,6 +1,6 @@
-import { Discord, Game } from ".";
+import { Discord, Game, Responce } from ".";
 
-export class Member {
+export class Member implements Responce {
   readonly id: number;
   readonly name: string;
   readonly discord: Discord;
@@ -11,5 +11,14 @@ export class Member {
     this.name = name;
     this.discord = discord;
     this.games = games;
+  }
+
+  toJSON(): object {
+    return {
+      id: this.id,
+      name: this.name,
+      discord: this.discord,
+      games: this.games
+    };
   }
 }

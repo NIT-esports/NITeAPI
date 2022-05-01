@@ -1,7 +1,7 @@
-import { Member, RoomInfo } from ".";
+import { Member, Responce, RoomInfo } from ".";
 import { MembersList } from "../controllers";
 
-export class Room {
+export class Room implements Responce {
   _sheet: GoogleAppsScript.Spreadsheet.Sheet
   info: RoomInfo;
   inmates: Member[];
