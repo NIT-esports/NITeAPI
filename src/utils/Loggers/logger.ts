@@ -1,5 +1,7 @@
-class Log {
-  static write(content) {
+import { Log } from ".";
+
+export class Logger {
+  static write(content: Log) {
     const id = PropertiesService.getScriptProperties().getProperty("LOG_SHEET_ID");
     const spreadsheet = SpreadsheetApp.openById(id);
     const sheet = spreadsheet.getSheets()[0];
