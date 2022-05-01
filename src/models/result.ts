@@ -1,4 +1,4 @@
-class RoomAccessResult {
+export class Result {
   state: string;
   message: string;
   
