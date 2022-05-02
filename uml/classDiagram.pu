@@ -62,7 +62,12 @@ package controllers
 {
     class MembersList
     {
-
+        +{static}<<readonly>>CACHE: MembersCache
+        +findByID(id: string): Member
+        +indexOF(id: string): number
+        +updateOfDiscord(newData: Discord): void
+        +register(member: Member): void
+        +isRegistedByID(id: string): boolean
     }
     class RoomAccessLogger
     {
@@ -71,6 +76,24 @@ package controllers
 }
 package utils
 {
+    package cached 
+    {
+        abstract Cache<T extends Cacheable<any>>
+        {
+            #<<readonly>>_sheetID: string
+            +<<readonly>>key: string
+            #{abstract}fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): T[]
+            #{abstract}toInstances(cached: object[]): T[]
+            +get(): T[]
+            +make(): T[]
+        }
+        interface Cacheable<T>
+        {
+            +fromObject(obj: object): Cacheable<T>
+            +toJSON(): object
+        }
+        class MembersCache
+    }
     package extensions
     {
         class Date
@@ -84,7 +107,10 @@ package utils
     }
 }
 
+MembersCache --|> Cache
+
 Member ..|> Responce
+Member ..|> Cacheable
 Room ..|> Responce
 
 Member "1" *-- "1" Discord
@@ -93,6 +119,10 @@ Room "1" *-- "1" RoomInfo
 Room "1" *-- "*" Member
 Result "1" *-- "1" Responce
 
+MembersList *--> MembersCache
+
+Cache --> Cacheable
+MembersCache --> Member
 AccessInfo --> Date
 MembersList --> Member
 Room --> String

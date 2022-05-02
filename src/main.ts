@@ -6,14 +6,11 @@ function toJson(data: any) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function makeCache() {
-  Cache.make();
-}
-
 function doGet(e: any) {
   const query = e.parameter;
   if (query.id) {
-    const member = MembersList.tryFind(query.id);
+    const list = new MembersList();
+    const member = list.findByID(query.id);
     if(member) {
       return toJson(new Result(ResultState.SUCCESS, "", member));
     }
@@ -29,17 +26,18 @@ function doGet(e: any) {
 
 function doPost(e: any) {
   const postdata = JSON.parse(e.postData.contents);
+  const list = new MembersList();
   if (postdata.id && postdata.nickname) {
-    if (MembersList.isRegistedById(postdata.id)) {
-      MembersList.update(new Discord(postdata.id, postdata.nickname));
+    if (list.isRegistedByID(postdata.id)) {
+      list.updateOfDiscord(new Discord(postdata.id, postdata.nickname));
     } else {
       const discord = new Discord(postdata.id, postdata.nickname);
       const member = new Member(0, "", discord, []);
-      MembersList.regist(member);
+      list.register(member);
     }
   } else if(postdata.room.name && postdata.type && postdata.member.id) {
     const roomInfo = new RoomInfo(postdata.room.name)
-    const member = MembersList.tryFind(postdata.member.id);
+    const member = list.findByID(postdata.member.id);
     const type = postdata.type == AccessType.ENTRY ? AccessType.ENTRY : AccessType.EXIT;
     const accessInfo = new AccessInfo(roomInfo, member, type);
     const room = new Room(postdata.room.name);

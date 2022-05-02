@@ -11,13 +11,14 @@ export class Room implements Responce {
     const spreadsheet = SpreadsheetApp.openById(id);
     const range = spreadsheet.getRangeByName(name.insertAt(1, "_"));
     const values: string[][] = range.getValues();
+    const list = new MembersList();
     CacheService.getScriptCache().put(name, JSON.stringify(values));
     this._sheet = range.getSheet();
     this.info = new RoomInfo(name);
     this.inmates = values.filter((value, index) => {
       return value[0];
     }).map((data, index) => {
-      const member = MembersList.tryFind(data[0]);
+      const member = list.findByID(data[0]);
       return member;
     });
   }
