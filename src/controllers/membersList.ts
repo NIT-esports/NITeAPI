@@ -7,7 +7,7 @@ export class MembersList {
   public findByID(id: string): Member {
     const cached = MembersList.CACHE.get() || MembersList.CACHE.make();
     return cached.find((member: Member) => {
-      return id == member.id.toString() || id == member.discord.id;
+      return id == member.id?.toString() || id == member.discord.id;
     });
   }
 
