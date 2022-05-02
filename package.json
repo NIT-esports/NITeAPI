@@ -1,0 +1,10 @@
+{
+  "name": "NITeAPI",
+  "version": "1.0.0",
+  "description": "This's google apps script project.",
+  "author": { "name": "Masaki Nishio", "email": "s192080@nishitech.ca.jp" },
+  "dependencies": {
+    "@types/google-apps-script": "^1.0.46",
+    "typescript": "^4.6.3"
+  }
+}
