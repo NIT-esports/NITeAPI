@@ -1,59 +1,40 @@
-import { Member, Discord, Game } from "../models";
+import { Member, Discord } from "../models";
+import { MembersCache } from "../utils/caches";
 
 export class MembersList {
-  static tryFind(target: string): Member {
-    const index = MembersList.indexOf(target);
-    const cache = Cache.getOrMake();
-    try {
-      const memberData: string[] = JSON.parse(cache.get(Cache.KEY.member))[index];
-      const discordData: string[] = JSON.parse(cache.get(Cache.KEY.discord))[index];
-      const gameData: string[] = JSON.parse(cache.get(Cache.KEY.game))[index];
-      const title: string[] = JSON.parse(cache.get(Cache.KEY.title));
-      const id: number = Number.parseInt(memberData[0]);
-      const name: string = memberData[1];
-      const discord = new Discord(discordData[0], discordData[1]);
-      const games: Game[] = [];
-      for (let i = 0; i < title.length; i++) {
-        games.push(new Game(title[i], gameData[i]));
-      }
-      return new Member(id, name, discord, games);
-    } catch (e) {
-      if (e instanceof RangeError) {
-        return null;
-      }
-    }
-  }
+  public static readonly CACHE = new MembersCache();
 
-  static indexOf(id: string): number {
-    const cache = Cache.getOrMake();
-    const data = id.toString().length < 10 ? cache.get(Cache.KEY.member) : cache.get(Cache.KEY.discord);
-    const values: string[][] = JSON.parse(data);
-    const reverse: string[][] = Object.keys(values[0]).map((c) => {
-      return values.map((r) => {
-        return r[c];
-      });
+  public findByID(id: string): Member {
+    const cached = MembersList.CACHE.get() || MembersList.CACHE.make();
+    return cached.find((member: Member) => {
+      return id == member.id?.toString() || id == member.discord.id;
     });
-    return reverse[0].indexOf(id.toString());
   }
 
-  static update(newData: Discord): void {
-    const index = MembersList.indexOf(newData.id);
-    if (index != -1) {
-      const id = PropertiesService.getScriptProperties().getProperty("NAME_LIST_SHEET_ID");
-      const spreadsheet = SpreadsheetApp.openById(id);
-      const range = spreadsheet.getRangeByName("DiscordData");
-      const cell = range.getCell(index + 1, 2);
-      cell.setValue(newData.nickname);
-    }
+  public indexOf(id: string): number {
+    const target = this.findByID(id);
+    const cached = MembersList.CACHE.get();
+    return cached.indexOf(target);
   }
 
-  static regist(newMember: Member): void {
+  public updateOfDiscord(newData: Discord): void {
     const id = PropertiesService.getScriptProperties().getProperty("NAME_LIST_SHEET_ID");
     const spreadsheet = SpreadsheetApp.openById(id);
-    spreadsheet.appendRow(["", newMember.id, newMember.name, "", "", "", "", newMember.discord.id, newMember.discord.nickname]);
+    const range = spreadsheet.getRangeByName("DiscordData");
+    const index = this.indexOf(newData.id);
+    const cell = range.getCell(index + 1, 2);
+    cell.setValue(newData.nickname);
+    MembersList.CACHE.make();
   }
 
-  static isRegistedById(id: string): boolean {
-    return MembersList.indexOf(id) != -1;
+  public register(member: Member): void {
+    const id = PropertiesService.getScriptProperties().getProperty("NAME_LIST_SHEET_ID");
+    const spreadsheet = SpreadsheetApp.openById(id);
+    spreadsheet.appendRow(["", member.id, member.name, "", "", "", "", member.discord.id, member.discord.nickname]);
+    MembersList.CACHE.make();
+  }
+
+  public isRegistedByID(id: string): boolean {
+    return this.findByID(id) != null;
   }
 }

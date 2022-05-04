@@ -1,6 +1,8 @@
 import { Discord, Game, Responce } from ".";
+import { Cacheable } from "../utils/caches";
 
-export class Member implements Responce {
+export interface Member extends Cacheable<typeof Member> {}
+export class Member implements Responce, Cacheable<typeof Member> {
   readonly id: number;
   readonly name: string;
   readonly discord: Discord;
@@ -11,6 +13,18 @@ export class Member implements Responce {
     this.name = name;
     this.discord = discord;
     this.games = games;
+  }
+
+  static fromObject(obj: any): Member {
+    try {
+      const discord = new Discord(obj.discord.id, obj.discord.nickname);
+      const games = obj.games.map((game) => {
+        return new Game(game.title, game.id);
+      });
+      return new Member(obj.id, obj.name, discord, games);
+    } catch (e) {
+      return null;
+    }
   }
 
   toJSON(): object {

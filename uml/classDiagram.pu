@@ -1,4 +1,20 @@
 @startuml
+package controllers
+{
+    class MembersList
+    {
+        +{static}<<readonly>>CACHE: MembersCache
+        +findByID(id: string): Member
+        +indexOF(id: string): number
+        +updateOfDiscord(newData: Discord): void
+        +register(member: Member): void
+        +isRegistedByID(id: string): boolean
+    }
+    class RoomAccessLogger
+    {
+        +{static}log(context: AccessInfo): void
+    }
+}
 package models
 {
     class AccessInfo
@@ -47,6 +63,7 @@ package models
     }
     class Room
     {
+        +{static}<<readonly>>CACHE: RoomCache
         +<<readonly>>info: RoomInfo
         +<<readonly>>inmates: Member[]
         +entry(member: Member): void
@@ -58,19 +75,27 @@ package models
         +<<readonly>>name: string
     }
 }
-package controllers
-{
-    class MembersList
-    {
-
-    }
-    class RoomAccessLogger
-    {
-        +{static}log(context: AccessInfo): void
-    }
-}
 package utils
 {
+    package cached 
+    {
+        abstract Cache<T extends Cacheable<any>>
+        {
+            #<<readonly>>_sheetID: string
+            +<<readonly>>key: string
+            #{abstract}fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): T[]
+            #{abstract}toInstances(cached: object[]): T[]
+            +get(): T[]
+            +make(): T[]
+        }
+        interface Cacheable<T>
+        {
+            +fromObject(obj: object): Cacheable<T>
+            +toJSON(): object
+        }
+        class MembersCache
+        class RoomCache
+    }
     package extensions
     {
         class Date
@@ -84,8 +109,13 @@ package utils
     }
 }
 
+MembersCache --|> Cache
+RoomCache --|> Cache
+
 Member ..|> Responce
+Member ..|> Cacheable
 Room ..|> Responce
+Room ..|> Cacheable
 
 Member "1" *-- "1" Discord
 Member "1" *-- "*" Game
@@ -93,6 +123,11 @@ Room "1" *-- "1" RoomInfo
 Room "1" *-- "*" Member
 Result "1" *-- "1" Responce
 
+MembersList *--> MembersCache
+Room *--> RoomCache
+
+Cache --> Cacheable
+MembersCache --> Member
 AccessInfo --> Date
 MembersList --> Member
 Room --> String

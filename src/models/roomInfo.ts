@@ -1,7 +1,9 @@
 export class RoomInfo {
-    readonly name: string;
+    public readonly campus: string;
+    public readonly name: string;
 
-    constructor(name: string) {
+    constructor(campus: string, name: string) {
+        this.campus = campus;
         this.name = name;
     }
 }
