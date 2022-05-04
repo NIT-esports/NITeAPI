@@ -17,7 +17,9 @@ function doGet(e: any) {
     return toJson(new Result(ResultState.FAILED, "No member with that ID was found.", null));
   }
   else if (query.name) {
-    const room = new Room(query.name);
+    const room = (Room.CACHE.get() || Room.CACHE.make()).find((value) => {
+      return value.info.name == query.name;
+    })
     return toJson(new Result(ResultState.SUCCESS, "", room));
   } else {
     return toJson(null);
@@ -35,12 +37,12 @@ function doPost(e: any) {
       const member = new Member(0, "", discord, []);
       list.register(member);
     }
-  } else if(postdata.room.name && postdata.type && postdata.member.id) {
-    const roomInfo = new RoomInfo(postdata.room.name)
+  } else if(postdata.room.campus && postdata.room.name && postdata.type && postdata.member.id) {
+    const roomInfo = new RoomInfo(postdata.room.campus, postdata.room.name)
     const member = list.findByID(postdata.member.id);
     const type = postdata.type == AccessType.ENTRY ? AccessType.ENTRY : AccessType.EXIT;
     const accessInfo = new AccessInfo(roomInfo, member, type);
-    const room = new Room(postdata.room.name);
+    const room = new Room(roomInfo, []);
     if(postdata.type == AccessType.ENTRY) {
       room.entry(member)
     } else {

@@ -1,58 +1,60 @@
 import { Member, Responce, RoomInfo } from ".";
-import { MembersList } from "../controllers";
+import { Cacheable, RoomCache } from "../utils/caches";
 
-export class Room implements Responce {
-  _sheet: GoogleAppsScript.Spreadsheet.Sheet
-  info: RoomInfo;
-  inmates: Member[];
+export interface Room extends Cacheable<typeof Room> {}
+export class Room implements Responce, Cacheable<typeof Room> {
+  public static readonly CACHE = new RoomCache();
+
+  public readonly info: RoomInfo;
+  public readonly inmates: Member[];
   
-  constructor(name: string) {
-    const id = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
-    const spreadsheet = SpreadsheetApp.openById(id);
-    const range = spreadsheet.getRangeByName(name.insertAt(1, "_"));
-    const values: string[][] = range.getValues();
-    const list = new MembersList();
-    CacheService.getScriptCache().put(name, JSON.stringify(values));
-    this._sheet = range.getSheet();
-    this.info = new RoomInfo(name);
-    this.inmates = values.filter((value, index) => {
-      return value[0];
-    }).map((data, index) => {
-      const member = list.findByID(data[0]);
-      return member;
-    });
+  constructor(info: RoomInfo, inmates: Member[]) {
+    this.info = info;
+    this.inmates = inmates;
   }
 
-  toJSON() {
+  public static fromObject(obj: any): Room {
+    try {
+      const info = new RoomInfo(obj.info.campus, obj.info.name);
+      const inmates = obj.inmates.map((inmate) => {
+        return Member.fromObject(inmate);
+      });
+      return new Room(info, inmates);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  public toJSON() {
     return {
       info: this.info,
       inmates: this.inmates
     };
   }
 
-  entry(member: Member) {
-    this.inmates.push(member);
-    this._sheet.appendRow([
+  public entry(member: Member) {
+    const id = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
+    const spreadsheet = SpreadsheetApp.openById(id);
+    const range = spreadsheet.getRangeByName("Inmates");
+    const sheet = range.getSheet();
+    sheet.appendRow([
       "",
       member.id,
       member.name,
-      member.discord.id,
-      member.discord.nickname
+      this.info.campus,
+      this.info.name
     ]);
   }
 
-  exit(member: Member) {
-    const json = CacheService.getScriptCache().get(this.info.name);
-    const values: string[][] = JSON.parse(json);
-    const transValues = Object.keys(values[0]).map((c) => {
-      return values.map((r) => {
-        return r[c];
-      });
+  public exit(member: Member) {
+    const cached = (Room.CACHE.get() || Room.CACHE.make()).find((value) => {
+      return value.info == this.info;
     });
-    const index = transValues[0].indexOf(member.id) + 5;
-    this._sheet.deleteRow(index);
-    this.inmates = this.inmates.filter((inmate, i) => {
-      return i != index - 5;
-    })
+    const id = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
+    const spreadsheet = SpreadsheetApp.openById(id);
+    const range = spreadsheet.getRangeByName("Inmates");
+    const sheet = range.getSheet();
+    const index = cached.inmates.findIndex((value) => value == member) + 5;
+    sheet.deleteRow(index);
   }
 }
