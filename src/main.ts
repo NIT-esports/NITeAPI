@@ -1,4 +1,4 @@
-import { Route } from "./routes";
+import { Route } from "./api/routes";
 
 function toJson(data: any) {
   return ContentService.createTextOutput(JSON.stringify(data))

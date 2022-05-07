@@ -2,7 +2,7 @@ import { Endpoint } from ".";
 import { User, Room, RoomEntry, RoomExit } from "./models";
 
 export class Route {
-    private static _routes: Endpoint[] = [
+    private static readonly _routes: Endpoint[] = [
         new User(),
         new Room(),
         new RoomEntry(),

@@ -1,4 +1,4 @@
-import { Result } from "../models";
+import { Result } from "../models"
 
 export interface Endpoint {
     path: string;

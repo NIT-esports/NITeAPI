@@ -1,6 +1,6 @@
 import { Get } from "..";
-import { MembersList } from "../../controllers";
-import { Result, ResultState } from "../../models";
+import { MembersList } from "../../../controllers";
+import { Result, ResultState } from "../../../models";
 
 export class User implements Get {
     path: string;

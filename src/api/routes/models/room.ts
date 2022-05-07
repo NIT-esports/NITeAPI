@@ -1,6 +1,7 @@
 import { Get, Post } from "..";
-import { MembersList, RoomAccessLogger } from "../../controllers";
-import { AccessInfo, AccessType, Result, ResultState, Room as RoomModel, RoomInfo } from "../../models";
+import { MembersList, RoomAccessLogger } from "../../../controllers";
+import { AccessInfo, AccessType, Room as RoomModel, RoomInfo } from "../../../models";
+import { Result, ResultState } from "../../models";
 
 export class Room implements Get {
     path: string;
@@ -14,9 +15,9 @@ export class Room implements Get {
             const room = (RoomModel.CACHE.get() || RoomModel.CACHE.make()).find((value) => {
                 return value.info.name == query.name;
             });
-            return new Result(ResultState.SUCCESS, "", room);
+            return Result.Success(room);
         } catch (e) {
-            return new Result(ResultState.FAILED, "Room name not specified", null);
+            return Result.Failed("Room name not specified");
         }
     }
 }
@@ -33,7 +34,7 @@ export class RoomEntry implements Post {
         try {
             const member = list.findByID(postdata.member.id);
             if (member) {
-                return new Result(ResultState.FAILED, Utilities.formatString("No member with ID %s was found", postdata.member.id), null);
+                return Result.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
             }
             const info = new RoomInfo(postdata.room.campus, postdata.room.name);
             const accessInfo = new AccessInfo(info, member, AccessType.ENTRY);
@@ -42,11 +43,11 @@ export class RoomEntry implements Post {
                 room.entry(member);
                 RoomModel.CACHE.make();
                 RoomAccessLogger.log(accessInfo);
-                return new Result(ResultState.SUCCESS, "", null);
+                return Result.Success(null);
             }
-            return new Result(ResultState.FAILED, "Already entered the room", null);
+            return Result.Failed("Already entered the room");
         } catch (e) {
-            return new Result(ResultState.FAILED, e.message, null);
+            return Result.Failed(e.message);
         }
     }
 }
@@ -63,7 +64,7 @@ export class RoomExit implements Post {
         try {
             const member = list.findByID(postdata.member.id);
             if (member) {
-                return new Result(ResultState.FAILED, Utilities.formatString("No member with ID %s was found", postdata.member.id), null);
+                return Result.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
             }
             const info = new RoomInfo(postdata.room.campus, postdata.room.name);
             const accessInfo = new AccessInfo(info, member, AccessType.EXIT);
@@ -74,9 +75,9 @@ export class RoomExit implements Post {
                 RoomAccessLogger.log(accessInfo);
                 return new Result(ResultState.SUCCESS, "", null);
             }
-            return new Result(ResultState.FAILED, "Already exited the room", null);
+            return Result.Failed("Already exited the room");
         } catch (e) {
-            return new Result(ResultState.FAILED, e.message, null);
+            return Result.Failed(e.message);
         }
     }
 }

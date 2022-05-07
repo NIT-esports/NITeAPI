@@ -1,8 +1,9 @@
-import { Member, Responce, RoomInfo } from ".";
+import { Member, RoomInfo } from ".";
+import { Response } from "../api/models";
 import { Cacheable, RoomCache } from "../utils/caches";
 
 export interface Room extends Cacheable<typeof Room> { }
-export class Room implements Responce, Cacheable<typeof Room> {
+export class Room implements Response, Cacheable<typeof Room> {
   public static readonly CACHE = new RoomCache();
 
   public readonly info: RoomInfo;
