@@ -1,8 +1,9 @@
-import { Discord, Game, Responce } from ".";
+import { Discord, Game } from ".";
+import { Response } from "../api/models";
 import { Cacheable } from "../utils/caches";
 
 export interface Member extends Cacheable<typeof Member> {}
-export class Member implements Responce, Cacheable<typeof Member> {
+export class Member implements Response, Cacheable<typeof Member> {
   readonly id: number;
   readonly name: string;
   readonly discord: Discord;

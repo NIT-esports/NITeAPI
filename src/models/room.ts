@@ -1,13 +1,14 @@
-import { Member, Responce, RoomInfo } from ".";
+import { Member, RoomInfo } from ".";
+import { Response } from "../api/models";
 import { Cacheable, RoomCache } from "../utils/caches";
 
-export interface Room extends Cacheable<typeof Room> {}
-export class Room implements Responce, Cacheable<typeof Room> {
+export interface Room extends Cacheable<typeof Room> { }
+export class Room implements Response, Cacheable<typeof Room> {
   public static readonly CACHE = new RoomCache();
 
   public readonly info: RoomInfo;
   public readonly inmates: Member[];
-  
+
   constructor(info: RoomInfo, inmates: Member[]) {
     this.info = info;
     this.inmates = inmates;
@@ -30,6 +31,12 @@ export class Room implements Responce, Cacheable<typeof Room> {
       info: this.info,
       inmates: this.inmates
     };
+  }
+
+  static fromCacheOrDefault(info: RoomInfo): Room {
+    return Room.CACHE.get().find((room) => {
+      return room.info.campus == info.campus && room.info.name == info.name;
+    }) || new Room(info, []);
   }
 
   public entry(member: Member) {
