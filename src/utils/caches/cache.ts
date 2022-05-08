@@ -1,31 +1,26 @@
 import { Cacheable } from ".";
 
-export abstract class Cache<T extends Cacheable<any>> {
-    protected readonly _sheetID: string;
-    public readonly key: string;
-
-    constructor(sheetID: string, key: string) {
-        this._sheetID = sheetID;
-        this.key = key;
-    }
-
-    protected abstract fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): T[];
-    protected abstract toInstances(cached: object[]): T[];
-
-    public get(): T[] {
-        const json = CacheService.getScriptCache().get(this.key);
+export class Cache {
+    public static get<T extends Cacheable<T>>(t: { new (...args: any): T }): T[] {
+        const cls = new t();
+        const json = CacheService.getScriptCache().get(cls.key);
         const cached: object[] = JSON.parse(json);
         if (cached) {
-            return this.toInstances(cached);
+            return cls.toInstances(cached);
         } else {
             return null;
         }
     }
 
-    public make(): T[] {
-        const spreadsheet = SpreadsheetApp.openById(this._sheetID);
-        const datas = this.fromSpreadsheet(spreadsheet);
-        const cache = Object.fromEntries([[this.key, JSON.stringify(datas)]]);
+    public static getOrMake<T extends Cacheable<T>>(t: { new (...args: any): T }): T[] {
+        return Cache.get(t) || Cache.make(t);
+    }
+
+    public static make<T extends Cacheable<T>>(t: { new (...args: any): T }): T[] {
+        const cls = new t();
+        const spreadsheet = SpreadsheetApp.openById(cls.cacheSourceSheetID);
+        const datas = cls.fromSpreadsheet(spreadsheet);
+        const cache = Object.fromEntries([[cls.key, JSON.stringify(datas)]]);
         CacheService.getScriptCache().putAll(cache, 21600);
         return datas;
     }

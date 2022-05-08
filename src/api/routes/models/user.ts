@@ -1,6 +1,7 @@
 import { Get } from "..";
-import { MembersList } from "../../../controllers";
-import { Result, ResultState } from "../../../models";
+import { Member } from "../../../models";
+import { Cache } from "../../../utils/caches";
+import { Result, ResultState } from "../../models";
 
 export class User implements Get {
     path: string;
@@ -10,9 +11,9 @@ export class User implements Get {
     }
 
     execute(query: { [key: string]: any; }): Result {
-        const list = new MembersList();
+        const cached = Cache.getOrMake<Member>(Member);
         try {
-            const member =  list.findByID(query.id);
+            const member =  cached.find((member) => member.id.toString() == query.id)
             return new Result(ResultState.SUCCESS, "", member);
         } catch(e) {
             return new Result(ResultState.FAILED, "id was not specified", null)

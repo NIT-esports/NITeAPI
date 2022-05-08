@@ -1,17 +1,50 @@
 import { Member, RoomInfo } from ".";
 import { Response } from "../api/models";
-import { Cacheable, RoomCache } from "../utils/caches";
+import { Cache, Cacheable } from "../utils/caches";
 
-export interface Room extends Cacheable<typeof Room> { }
-export class Room implements Response, Cacheable<typeof Room> {
-  public static readonly CACHE = new RoomCache();
-
+export class Room implements Response, Cacheable<Room> {
   public readonly info: RoomInfo;
   public readonly inmates: Member[];
+  readonly key: string;
+  readonly cacheSourceSheetID: string;
 
   constructor(info: RoomInfo, inmates: Member[]) {
     this.info = info;
     this.inmates = inmates;
+    this.key = "rooms";
+    this.cacheSourceSheetID = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
+  }
+
+  fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): Room[] {
+    const range = spreadsheet.getRangeByName("Inmates");
+    const values: string[][] = range.getValues().filter(value => value[0]);
+    try {
+      const infos = Array.from(new Map(values.map((value) => {
+        const campus = value[2];
+        const name = value[3];
+        const key = campus + name;
+        return [key, new RoomInfo(campus, name)];
+      })).values());
+      const cached = Cache.getOrMake<Member>(Member);
+      return infos.map((info) => {
+        const inmates = values.filter((value) => {
+          return value[2] == info.campus && value[3] == info.name;
+        }).map((value) => {
+          return cached.find((member) => {
+            return member.id.toString() == value[0];
+          });
+        });
+        return new Room(info, inmates);
+      });
+    } catch (e) {
+      return [];
+    }
+  }
+
+  toInstances(cached: object[]): Room[] {
+    return cached.map((cache) => {
+      return Room.fromObject(cache);
+    });
   }
 
   public static fromObject(obj: any): Room {
@@ -33,12 +66,6 @@ export class Room implements Response, Cacheable<typeof Room> {
     };
   }
 
-  static fromCacheOrDefault(info: RoomInfo): Room {
-    return Room.CACHE.get().find((room) => {
-      return room.info.campus == info.campus && room.info.name == info.name;
-    }) || new Room(info, []);
-  }
-
   public entry(member: Member) {
     const id = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
     const spreadsheet = SpreadsheetApp.openById(id);
@@ -54,14 +81,13 @@ export class Room implements Response, Cacheable<typeof Room> {
   }
 
   public exit(member: Member) {
-    const cached = (Room.CACHE.get() || Room.CACHE.make()).find((value) => {
-      return value.info == this.info;
-    });
+    const cached = Cache.getOrMake<Room>(Room);
+    const room = cached.find((room) => room.info.campus == this.info.campus && room.info.name == this.info.name)
     const id = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
     const spreadsheet = SpreadsheetApp.openById(id);
     const range = spreadsheet.getRangeByName("Inmates");
     const sheet = range.getSheet();
-    const index = cached.inmates.findIndex((value) => value == member) + 5;
+    const index = room.inmates.findIndex((value) => value == member) + 5;
     sheet.deleteRow(index);
   }
 }

@@ -1,8 +1,6 @@
-export interface CacheableStatic<T extends new (...args) => Cacheable<T>> {
-    fromObject(obj: object): Cacheable<T>;
-}
-
-export interface Cacheable<T extends new (...args) => any> {
-    toJSON(): object;
-    constructor: T;
+export interface Cacheable<T> {
+    readonly key: string 
+    readonly cacheSourceSheetID: string
+    fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): T[];
+    toInstances(cached: object[]): T[];
 }

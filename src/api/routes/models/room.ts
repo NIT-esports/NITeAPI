@@ -1,7 +1,8 @@
 import { Get, Post } from "..";
-import { MembersList, RoomAccessLogger } from "../../../controllers";
-import { AccessInfo, AccessType, Room as RoomModel, RoomInfo } from "../../../models";
-import { Result, ResultState } from "../../models";
+import { RoomAccessLogger } from "../../../controllers";
+import { AccessInfo, AccessType, Member, Room as RoomModel, RoomInfo } from "../../../models";
+import { Cache } from "../../../utils/caches";
+import { Result } from "../../models";
 
 export class Room implements Get {
     path: string;
@@ -12,7 +13,7 @@ export class Room implements Get {
 
     execute(query: { [key: string]: any; }): Result {
         try {
-            const room = (RoomModel.CACHE.get() || RoomModel.CACHE.make()).find((value) => {
+            const room = Cache.getOrMake<RoomModel>(RoomModel).find((value) => {
                 return value.info.name == query.name;
             });
             return Result.Success(room);
@@ -30,18 +31,20 @@ export class RoomEntry implements Post {
     }
 
     execute(query: { [key: string]: any; }, postdata: { [key: string]: any; }): Result {
-        const list = new MembersList();
+        const cached = Cache.getOrMake<Member>(Member);
         try {
-            const member = list.findByID(postdata.member.id);
+            const member = cached.find((member) => member.id == postdata.member.id);
             if (member) {
                 return Result.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
             }
             const info = new RoomInfo(postdata.room.campus, postdata.room.name);
             const accessInfo = new AccessInfo(info, member, AccessType.ENTRY);
-            const room = RoomModel.fromCacheOrDefault(info);
+            const room = Cache.getOrMake<RoomModel>(RoomModel).find((room) => {
+                return room.info.campus == info.campus && room.info.name == info.name;
+            });
             if (room.inmates.some((inmate) => inmate.id == member.id)) {
                 room.entry(member);
-                RoomModel.CACHE.make();
+                Cache.make<RoomModel>(RoomModel);
                 RoomAccessLogger.log(accessInfo);
                 return Result.Success(null);
             }
@@ -60,20 +63,22 @@ export class RoomExit implements Post {
     }
 
     execute(query: { [key: string]: any; }, postdata: { [key: string]: any; }): Result {
-        const list = new MembersList();
+        const cached = Cache.getOrMake<Member>(Member);
         try {
-            const member = list.findByID(postdata.member.id);
+            const member = cached.find((member) => member.id == postdata.member.id);
             if (member) {
                 return Result.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
             }
             const info = new RoomInfo(postdata.room.campus, postdata.room.name);
             const accessInfo = new AccessInfo(info, member, AccessType.EXIT);
-            const room = RoomModel.fromCacheOrDefault(info);
+            const room = Cache.getOrMake<RoomModel>(RoomModel).find((room) => {
+                return room.info.campus == info.campus && room.info.name == info.name;
+            });
             if (room.inmates.some((inmate) => inmate.id == member.id)) {
                 room.entry(member);
-                RoomModel.CACHE.make();
+                Cache.make<RoomModel>(RoomModel);
                 RoomAccessLogger.log(accessInfo);
-                return new Result(ResultState.SUCCESS, "", null);
+                return Result.Success(null);
             }
             return Result.Failed("Already exited the room");
         } catch (e) {
