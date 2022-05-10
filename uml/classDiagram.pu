@@ -23,25 +23,37 @@ package api
     }
     package routes
     {
+        package controllers
+        {
+            package MemberController
+            {
+                class Index
+            }
+            package RoomController
+            {
+                class "Index "
+                class Entry
+                class Exit
+            }
+        }
         package " models"
         {
-            class " Room"
-            class RoomEntry
-            class RoomExit
-            class User
-        }
-        interface Endpoint
-        {
-            +path: string
-            +execute(query: {[key: string]: any}, postdata?: {[key: string]: any}): Result
-        }
-        interface Get
-        {
-            +execute(query: {[key: string]: any}): Result
-        }
-        interface Post
-        {
-            +execute(query: {[key: string]: any}, postdata: {[key: string]: any}): Result
+            interface Endpoint
+            {
+                +path: string
+                +execute(query: {[key: string]: any}, postdata?: {[key: string]: any}): Result
+            }
+            package MethodType
+            {
+                interface Get
+                {
+                    +execute(query: {[key: string]: any}): Result
+                }
+                interface Post
+                {
+                    +execute(query: {[key: string]: any}, postdata: {[key: string]: any}): Result
+                }
+            }
         }
         class Route
         {
@@ -50,7 +62,7 @@ package api
         }
     }
 }
-package controllers
+package "controllers "
 {
     class RoomAccessLogger
     {
@@ -141,10 +153,10 @@ Member .up.|> Response
 Member .up.|> Cacheable
 Room .up.|> Response
 Room .up.|> Cacheable
-" Room" .up.|> Get
-RoomEntry .up.|> Post
-RoomExit .up.|> Post
-User .up.|> Get
+Index .up.|> Get
+Entry .up.|> Post
+Exit .up.|> Post
+"Index " .up.|> Get
 
 Member "1" *-- "1" Discord
 Member "1" *-- "*" Game

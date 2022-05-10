@@ -1,12 +1,12 @@
-import { Endpoint } from ".";
-import { User, Room, RoomEntry, RoomExit } from "./models";
+import { Endpoint } from "./models";
+import { MemberController, RoomController } from "./controllers";
 
 export class Route {
     private static readonly _routes: Endpoint[] = [
-        new User(),
-        new Room(),
-        new RoomEntry(),
-        new RoomExit()
+        new MemberController.Index(),
+        new RoomController.Index(),
+        new RoomController.Entry(),
+        new RoomController.Exit()
     ];
 
     static get(path: string): Endpoint {
