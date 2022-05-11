@@ -1,8 +1,7 @@
-import { Discord, Game } from ".";
+import { Discord, Game, Response } from ".";
 import { Cacheable } from "../../caches";
-import { DTO } from "../";
 
-export class Member implements DTO, Cacheable<Member> {
+export class Member extends Response<Member> implements Cacheable<Member> {
   readonly id: number;
   readonly name: string;
   readonly discord: Discord;
@@ -10,24 +9,22 @@ export class Member implements DTO, Cacheable<Member> {
   readonly key: string;
   readonly cacheSourceSheetID: string;
 
-  constructor(id: number, name: string, discord: Discord, games: Game[]) {
-    this.id = id;
-    this.name = name;
-    this.discord = discord;
-    this.games = games;
-    this.key = "members";
-    this.cacheSourceSheetID = PropertiesService.getScriptProperties().getProperty("NAME_LIST_SHEET_ID");
-  }
-
-  static fromObject(obj: any): Member {
-    try {
-      const discord = new Discord(obj.discord.id, obj.discord.nickname);
-      const games = obj.games.map((game) => {
-        return new Game(game.title, game.id);
-      });
-      return new Member(obj.id, obj.name, discord, games);
-    } catch (e) {
-      return null;
+  constructor()
+  constructor(partial: Partial<Member>)
+  constructor(id: number, name: string, discord: Discord, games: Game[])
+  constructor(idOrPartial?: number | Partial<Member>, name?: string, discord?: Discord, games?: Game[]) {
+    if (!idOrPartial) {
+      super({});
+      this.key = "members";
+      this.cacheSourceSheetID = PropertiesService.getScriptProperties().getProperty("NAME_LIST_SHEET_ID");
+    } else if (typeof idOrPartial == "number") {
+      super({});
+      this.id = idOrPartial;
+      this.name = name;
+      this.discord = discord;
+      this.games = games;
+    } else {
+      super(idOrPartial);
     }
   }
 
@@ -62,7 +59,7 @@ export class Member implements DTO, Cacheable<Member> {
 
   toInstances(cached: object[]): Member[] {
     return cached.map((cache) => {
-      return Member.fromObject(cache);
+      return new Member(cache);
     });
   }
 }

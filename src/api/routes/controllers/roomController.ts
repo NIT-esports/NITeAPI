@@ -5,6 +5,7 @@ import { APIResponse } from "../../models";
 import { NameAndCampus } from "../../models/queries/nameAndCampus";
 import { Room, Member, RoomInfo } from "../../models/responses";
 import { Get, Post } from "../models/methodType";
+import { AccessRequest } from "../../models/requests";
 
 export namespace RoomController {
     export class Index implements Get {
@@ -33,14 +34,15 @@ export namespace RoomController {
             this.path = "room/entry";
         }
 
-        execute(parameter: object, postdata: { [key: string]: any; }): APIResponse {
+        execute(parameter: object, postdata: object): APIResponse {
+            const req = new AccessRequest(postdata);
             const cached = Cache.getOrMake<Member>(Member);
             try {
-                const member = cached.find((member) => member.id == postdata.member.id);
+                const member = cached.find((member) => member.id?.toString() == req.id);
                 if (member) {
-                    return APIResponse.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
+                    return APIResponse.Failed(Utilities.formatString("No member with ID %s was found", req.id));
                 }
-                const info = new RoomInfo(postdata.room.campus, postdata.room.name);
+                const info = new RoomInfo(req.place.campus, req.place.name);
                 const accessInfo = new AccessInfo(info, member, AccessType.ENTRY);
                 const room = Cache.getOrMake<Room>(Room).find((room) => {
                     return room.info.campus == info.campus && room.info.name == info.name;
@@ -64,14 +66,15 @@ export namespace RoomController {
             this.path = "room/exit";
         }
 
-        execute(parameter: object, postdata: { [key: string]: any; }): APIResponse {
+        execute(parameter: object, postdata: object): APIResponse {
+            const req = new AccessRequest(postdata);
             const cached = Cache.getOrMake<Member>(Member);
             try {
-                const member = cached.find((member) => member.id == postdata.member.id);
+                const member = cached.find((member) => member.id?.toString() == req.id);
                 if (member) {
-                    return APIResponse.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
+                    return APIResponse.Failed(Utilities.formatString("No member with ID %s was found", req.id));
                 }
-                const info = new RoomInfo(postdata.room.campus, postdata.room.name);
+                const info = new RoomInfo(req.place.campus, req.place.name);
                 const accessInfo = new AccessInfo(info, member, AccessType.EXIT);
                 const room = Cache.getOrMake<Room>(Room).find((room) => {
                     return room.info.campus == info.campus && room.info.name == info.name;

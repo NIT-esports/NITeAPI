@@ -1,19 +1,28 @@
-import { Member, RoomInfo } from ".";
+import { Member, Response, RoomInfo } from ".";
 import { Cacheable, Cache } from "../../caches";
-import { DTO } from "../";
 
 
-export class Room implements DTO, Cacheable<Room> {
+export class Room extends Response<Room> implements Cacheable<Room> {
   public readonly info: RoomInfo;
   public readonly inmates: Member[];
   readonly key: string;
   readonly cacheSourceSheetID: string;
 
-  constructor(info: RoomInfo, inmates: Member[]) {
-    this.info = info;
-    this.inmates = inmates;
-    this.key = "rooms";
-    this.cacheSourceSheetID = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
+  constructor()
+  constructor(partial: Partial<Room>)
+  constructor(info: RoomInfo, inmates: Member[])
+  constructor(infoOrPartial?: RoomInfo | Partial<Room>, inmates?: Member[]) {
+    if (!infoOrPartial) {
+      super({});
+      this.key = "rooms";
+      this.cacheSourceSheetID = PropertiesService.getScriptProperties().getProperty("ROOM_SHEET_ID");
+    } else if (infoOrPartial instanceof RoomInfo) {
+      super({});
+      this.info = infoOrPartial;
+      this.inmates = inmates;
+    } else {
+      super(infoOrPartial);
+    }
   }
 
   fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): Room[] {
@@ -44,20 +53,8 @@ export class Room implements DTO, Cacheable<Room> {
 
   toInstances(cached: object[]): Room[] {
     return cached.map((cache) => {
-      return Room.fromObject(cache);
+      return new Room(cache);
     });
-  }
-
-  public static fromObject(obj: any): Room {
-    try {
-      const info = new RoomInfo(obj.info.campus, obj.info.name);
-      const inmates = obj.inmates.map((inmate) => {
-        return Member.fromObject(inmate);
-      });
-      return new Room(info, inmates);
-    } catch (e) {
-      return null;
-    }
   }
 
   public toJSON() {
