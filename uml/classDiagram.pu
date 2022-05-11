@@ -1,11 +1,49 @@
 @startuml
 package api
 {
+    package caches
+    {
+        class Cache
+        {
+            +{static}get<T extends Cacheable<T>>(): T[]
+            +{static}getOrMake<T extends Cacheable<T>>(): T[]
+            +{static}make<T extends Cacheable<T>>(): T[]
+        }
+        interface Cacheable<T>
+        {
+            +<<readonly>>key: string
+            +<<readonly>>cacheSourceSheetID: string
+            +fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): T[]
+            +toInstances(cached: object[]): T[]
+        }
+    }
+    package logger
+    {
+        package "models "
+        {
+            class AccessInfo
+            {
+                +<<readonly>>room: RoomInfo
+                +<<readonly>>member: Member
+                +<<readonly>>type: AccessType
+                +<<readonly>>time: Date
+            }
+            enum AccessType
+            {
+                ENTRY,
+                EXIT
+            }
+        }
+        class RoomAccessLogger
+        {
+            +{static}log(context: AccessInfo): void
+        }
+    }
     package models
     {
         package queries
         {
-            class ID 
+            class ID
             {
                 +id: string
             }
@@ -14,7 +52,7 @@ package api
                 +name: string
                 +campus: string
             }
-            abstract Query<T> 
+            abstract Query<T>
         }
         package responses
         {
@@ -102,51 +140,13 @@ package api
         }
         class Route
         {
-            -{static}<<readonly>>_routes: Endpoint[]
+            {static}<<readonly>>_routes: Endpoint[]
             +{static}get(path: string): Endpoint
         }
     }
 }
-package "controllers "
-{
-    class RoomAccessLogger
-    {
-        +{static}log(context: AccessInfo): void
-    }
-}
-package "models "
-{
-    class AccessInfo
-    {
-        +<<readonly>>room: RoomInfo
-        +<<readonly>>member: Member
-        +<<readonly>>type: AccessType
-        +<<readonly>>time: Date
-    }
-    enum AccessType
-    {
-        ENTRY,
-        EXIT
-    }
-}
 package utils
 {
-    package cached
-    {
-        class Cache
-        {
-            +{static}get<T extends Cacheable<T>>(): T[]
-            +{static}getOrMake<T extends Cacheable<T>>(): T[]
-            +{static}make<T extends Cacheable<T>>(): T[]
-        }
-        interface Cacheable<T>
-        {
-            +<<readonly>>key: string
-            +<<readonly>>cacheSourceSheetID: string
-            +fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): T[]
-            +toInstances(cached: object[]): T[]
-        }
-    }
     package extensions
     {
         class Date

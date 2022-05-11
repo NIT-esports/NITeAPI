@@ -1,5 +1,5 @@
 import { Member, RoomInfo } from ".";
-import { Cacheable, Cache } from "../../../utils/caches";
+import { Cacheable, Cache } from "../../caches";
 import { DTO } from "../";
 
 

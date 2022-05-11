@@ -1,4 +1,4 @@
-import { Cache } from "../../../utils/caches";
+import { Cache } from "../../caches";
 import { Response } from "../../models";
 import { ID } from "../../models/queries/id";
 import { Member } from "../../models/responses";

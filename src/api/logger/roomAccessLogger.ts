@@ -1,4 +1,4 @@
-import { AccessInfo } from "../models";
+import { AccessInfo } from "./models";
 
 export class RoomAccessLogger {
   static log(content: AccessInfo) {

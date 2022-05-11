@@ -1,6 +1,6 @@
-import { RoomAccessLogger } from "../../../controllers";
-import { AccessInfo, AccessType } from "../../../models";
-import { Cache } from "../../../utils/caches";
+import { RoomAccessLogger } from "../../logger";
+import { AccessInfo, AccessType } from "../../logger/models";
+import { Cache } from "../../caches";
 import { Response } from "../../models";
 import { NameAndCampus } from "../../models/queries/nameAndCampus";
 import { Room, Member, RoomInfo } from "../../models/responses";

@@ -1,5 +1,5 @@
 import { Discord, Game } from ".";
-import { Cacheable } from "../../../utils/caches";
+import { Cacheable } from "../../caches";
 import { DTO } from "../";
 
 export class Member implements DTO, Cacheable<Member> {

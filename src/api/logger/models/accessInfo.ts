@@ -1,4 +1,5 @@
-import { AccessType, Member, RoomInfo } from ".";
+import { AccessType } from ".";
+import { RoomInfo, Member } from "../../models/responses";
 
 export class AccessInfo {
   room: RoomInfo;
