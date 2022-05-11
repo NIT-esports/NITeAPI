@@ -103,8 +103,8 @@ package api
         {
             +<<readonly>>state: ResultState
             +<<readonly>>message: string
-            +<<readonly>>data: Response
-            +{static}Success(response: DTO): APIResponse
+            +<<readonly>>data: Response<any> || Response<any>[]
+            +{static}Success(response: Response<any> || Response<any>[]): APIResponse
             +{static}Failed(message: string): APIResponse
         }
         abstract DTO<T>
