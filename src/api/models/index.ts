@@ -1,3 +1,3 @@
 export { Response } from "./response"
-export { Result } from "./result"
-export { ResultState } from "./resultState"
+export { Request } from "./request"
+export { APIResponse } from "./apiResponse"
