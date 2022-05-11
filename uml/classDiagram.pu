@@ -54,6 +54,15 @@ package api
             }
             abstract Query<T>
         }
+        package requests
+        {
+            abstract Request<T>
+            class AccessRequest
+            {
+                +id: string
+                +place: { campus: string, name: string }
+            }
+        }
         package responses
         {
             class Discord
@@ -98,6 +107,7 @@ package api
             +{static}Success(response: DTO): APIResponse
             +{static}Failed(message: string): APIResponse
         }
+        abstract DTO<T>
         enum ResultState
         {
             SUCCESS,
@@ -160,6 +170,8 @@ package utils
     }
 }
 
+DTO --|> Request
+Request --|> AccessRequest
 Query --|> ID
 Query --|> NameAndCampus
 Endpoint --|> Get
@@ -188,6 +200,8 @@ RoomAccessLogger --> AccessInfo
 Endpoint --> APIResponse
 MemberIndex --> ID
 RoomIndex --> NameAndCampus
+Entry --> AccessRequest
+Exit --> AccessRequest
 
 APIResponse +-- ResultState
 

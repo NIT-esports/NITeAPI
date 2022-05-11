@@ -6,5 +6,5 @@ export interface Get extends Endpoint {
 }
 
 export interface Post extends Endpoint {
-    execute(parameter: object, postdata: { [key: string]: any }): APIResponse
+    execute(parameter: object, postdata: object): APIResponse
 }

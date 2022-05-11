@@ -1,5 +1,9 @@
 import { Route } from "./api/routes";
 
+function getToken() {
+  console.log(ScriptApp.getOAuthToken());
+}
+
 function toJson(data: any) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
