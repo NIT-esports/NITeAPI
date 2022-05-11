@@ -41,7 +41,7 @@ export class Room extends Response<Room> implements Cacheable<Room> {
           return value[2] == info.campus && value[3] == info.name;
         }).map((value) => {
           return cached.find((member) => {
-            return member.id.toString() == value[0];
+            return member.id?.toString() == value[0];
           });
         });
         return new Room(info, inmates);

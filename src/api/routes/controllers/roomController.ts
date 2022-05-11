@@ -16,15 +16,15 @@ export namespace RoomController {
         }
 
         execute(parameter: object): APIResponse {
-            try {
-                const query = new NameAndCampus(parameter);
-                const room = Cache.getOrMake<Room>(Room).find((value) => {
-                    return value.info.name == query.name;
-                });
-                return APIResponse.Success(room);
-            } catch (e) {
-                return APIResponse.Failed("Room name not specified");
+            const cached = Cache.getOrMake<Room>(Room);
+            const query = new NameAndCampus(parameter);
+            const rooms = cached.filter((room) => {
+                return room.info.name == query.name || room.info.campus == query.campus
+            });
+            if (rooms.length) {
+                return APIResponse.Success(rooms);
             }
+            return APIResponse.Success(cached);
         }
     }
     export class Entry implements Post {
@@ -39,7 +39,7 @@ export namespace RoomController {
             const cached = Cache.getOrMake<Member>(Member);
             try {
                 const member = cached.find((member) => member.id?.toString() == req.id);
-                if (member) {
+                if (!member) {
                     return APIResponse.Failed(Utilities.formatString("No member with ID %s was found", req.id));
                 }
                 const info = new RoomInfo(req.place.campus, req.place.name);
@@ -71,7 +71,7 @@ export namespace RoomController {
             const cached = Cache.getOrMake<Member>(Member);
             try {
                 const member = cached.find((member) => member.id?.toString() == req.id);
-                if (member) {
+                if (!member) {
                     return APIResponse.Failed(Utilities.formatString("No member with ID %s was found", req.id));
                 }
                 const info = new RoomInfo(req.place.campus, req.place.name);
@@ -80,7 +80,7 @@ export namespace RoomController {
                     return room.info.campus == info.campus && room.info.name == info.name;
                 });
                 if (room.inmates.some((inmate) => inmate.id == member.id)) {
-                    room.entry(member);
+                    room.exit(member);
                     Cache.make<Room>(Room);
                     RoomAccessLogger.log(accessInfo);
                     return APIResponse.Success(null);
