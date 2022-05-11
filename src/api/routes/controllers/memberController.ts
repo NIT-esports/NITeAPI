@@ -1,6 +1,7 @@
-import { Member } from "../../../models";
 import { Cache } from "../../../utils/caches";
-import { Result, ResultState } from "../../models";
+import { Response } from "../../models";
+import { ID } from "../../models/queries/id";
+import { Member } from "../../models/responses";
 import { Get } from "../models/methodType";
 
 export namespace MemberController {
@@ -11,13 +12,14 @@ export namespace MemberController {
             this.path = "member";
         }
 
-        execute(query: { [key: string]: any; }): Result {
+        execute(parameter: object): Response {
             const cached = Cache.getOrMake<Member>(Member);
+            const query = new ID(parameter);
             try {
-                const member = cached.find((member) => member.id.toString() == query.id)
-                return new Result(ResultState.SUCCESS, "", member);
+                const member = cached.find((member) => member.id?.toString() == query.id)
+                return Response.Success(member);
             } catch (e) {
-                return new Result(ResultState.FAILED, "id was not specified", null)
+                return Response.Failed("id was not specified")
             }
         }
     }

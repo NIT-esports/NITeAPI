@@ -1,6 +1,6 @@
-import { Result } from "../../models"
+import { Response } from "../../models";
 
 export interface Endpoint {
     path: string;
-    execute(query: { [key: string]: any }, postdata?: { [key: string]: any }): Result
+    execute(parameter: object, postdata?: { [key: string]: any }): Response
 }

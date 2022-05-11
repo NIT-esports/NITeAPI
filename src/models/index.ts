@@ -1,7 +1,2 @@
 export { AccessInfo } from "./accessInfo"
 export { AccessType } from "./accessType"
-export { Discord } from "./discord"
-export { Game } from "./game"
-export { Member } from "./member"
-export { Room } from "./room"
-export { RoomInfo } from "./roomInfo"

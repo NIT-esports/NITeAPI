@@ -1,8 +1,9 @@
 import { Member, RoomInfo } from ".";
-import { Response } from "../api/models";
-import { Cache, Cacheable } from "../utils/caches";
+import { Cacheable, Cache } from "../../../utils/caches";
+import { DTO } from "../";
 
-export class Room implements Response, Cacheable<Room> {
+
+export class Room implements DTO, Cacheable<Room> {
   public readonly info: RoomInfo;
   public readonly inmates: Member[];
   readonly key: string;

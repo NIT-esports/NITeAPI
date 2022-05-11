@@ -1,7 +1,9 @@
 import { RoomAccessLogger } from "../../../controllers";
-import { AccessInfo, AccessType, Member, Room, RoomInfo } from "../../../models";
+import { AccessInfo, AccessType } from "../../../models";
 import { Cache } from "../../../utils/caches";
-import { Result } from "../../models";
+import { Response } from "../../models";
+import { NameAndCampus } from "../../models/queries/nameAndCampus";
+import { Room, Member, RoomInfo } from "../../models/responses";
 import { Get, Post } from "../models/methodType";
 
 export namespace RoomController {
@@ -12,18 +14,18 @@ export namespace RoomController {
             this.path = "room";
         }
 
-        execute(query: { [key: string]: any; }): Result {
+        execute(parameter: object): Response {
             try {
+                const query = new NameAndCampus(parameter);
                 const room = Cache.getOrMake<Room>(Room).find((value) => {
                     return value.info.name == query.name;
                 });
-                return Result.Success(room);
+                return Response.Success(room);
             } catch (e) {
-                return Result.Failed("Room name not specified");
+                return Response.Failed("Room name not specified");
             }
         }
     }
-
     export class Entry implements Post {
         path: string;
 
@@ -31,12 +33,12 @@ export namespace RoomController {
             this.path = "room/entry";
         }
 
-        execute(query: { [key: string]: any; }, postdata: { [key: string]: any; }): Result {
+        execute(parameter: object, postdata: { [key: string]: any; }): Response {
             const cached = Cache.getOrMake<Member>(Member);
             try {
                 const member = cached.find((member) => member.id == postdata.member.id);
                 if (member) {
-                    return Result.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
+                    return Response.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
                 }
                 const info = new RoomInfo(postdata.room.campus, postdata.room.name);
                 const accessInfo = new AccessInfo(info, member, AccessType.ENTRY);
@@ -47,15 +49,14 @@ export namespace RoomController {
                     room.entry(member);
                     Cache.make<Room>(Room);
                     RoomAccessLogger.log(accessInfo);
-                    return Result.Success(null);
+                    return Response.Success(null);
                 }
-                return Result.Failed("Already entered the room");
+                return Response.Failed("Already entered the room");
             } catch (e) {
-                return Result.Failed(e.message);
+                return Response.Failed(e.message);
             }
         }
     }
-
     export class Exit implements Post {
         path: string;
 
@@ -63,12 +64,12 @@ export namespace RoomController {
             this.path = "room/exit";
         }
 
-        execute(query: { [key: string]: any; }, postdata: { [key: string]: any; }): Result {
+        execute(parameter: object, postdata: { [key: string]: any; }): Response {
             const cached = Cache.getOrMake<Member>(Member);
             try {
                 const member = cached.find((member) => member.id == postdata.member.id);
                 if (member) {
-                    return Result.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
+                    return Response.Failed(Utilities.formatString("No member with ID %s was found", postdata.member.id));
                 }
                 const info = new RoomInfo(postdata.room.campus, postdata.room.name);
                 const accessInfo = new AccessInfo(info, member, AccessType.EXIT);
@@ -79,11 +80,11 @@ export namespace RoomController {
                     room.entry(member);
                     Cache.make<Room>(Room);
                     RoomAccessLogger.log(accessInfo);
-                    return Result.Success(null);
+                    return Response.Success(null);
                 }
-                return Result.Failed("Already exited the room");
+                return Response.Failed("Already exited the room");
             } catch (e) {
-                return Result.Failed(e.message);
+                return Response.Failed(e.message);
             }
         }
     }

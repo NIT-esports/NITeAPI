@@ -1,8 +1,8 @@
 import { Discord, Game } from ".";
-import { Response } from "../api/models";
-import { Cacheable } from "../utils/caches";
+import { Cacheable } from "../../../utils/caches";
+import { DTO } from "../";
 
-export class Member implements Response, Cacheable<Member> {
+export class Member implements DTO, Cacheable<Member> {
   readonly id: number;
   readonly name: string;
   readonly discord: Discord;

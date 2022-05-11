@@ -3,17 +3,62 @@ package api
 {
     package models
     {
-        interface Response
+        package queries
+        {
+            class ID 
+            {
+                +id: string
+            }
+            class NameAndCampus
+            {
+                +name: string
+                +campus: string
+            }
+            abstract Query<T> 
+        }
+        package responses
+        {
+            class Discord
+            {
+                +<<readonly>>id: string
+                +<<readonly>>nickname: string
+            }
+            class Game
+            {
+                +<<readonly>>title: string
+                +<<readonly>>id: string
+            }
+            class Member
+            {
+                +<<readonly>>id: number
+                +<<readonly>>name: string
+                +<<readonly>>discord: Discord
+                +<<readonly>>games: Game[]
+            }
+            class Room
+            {
+                +<<readonly>>info: RoomInfo
+                +<<readonly>>inmates: Member[]
+                +entry(member: Member): void
+                +exit(member: Member): void
+            }
+            class RoomInfo
+            {
+                +<<readonly>>campus: string
+                +<<readonly>>name: string
+            }
+        }
+        interface DTO
         {
             +toJSON(): object
         }
-        class Result
+        class Response
         {
             +<<readonly>>state: ResultState
             +<<readonly>>message: string
-            +<<readonly>>data: Response
-            +{static}Success(response: Response): Result
-            +{static}Failed(message: string): Result
+            +<<readonly>>data: DTO
+            +{static}Success(response: DTO): Response
+            +{static}Failed(message: string): Response
         }
         enum ResultState
         {
@@ -27,11 +72,11 @@ package api
         {
             package MemberController
             {
-                class Index
+                class "Index" as MemberIndex
             }
             package RoomController
             {
-                class "Index "
+                class "Index " as RoomIndex
                 class Entry
                 class Exit
             }
@@ -41,17 +86,17 @@ package api
             interface Endpoint
             {
                 +path: string
-                +execute(query: {[key: string]: any}, postdata?: {[key: string]: any}): Result
+                +execute(parameter: object, postdata?: {[key: string]: any}): Result
             }
             package MethodType
             {
                 interface Get
                 {
-                    +execute(query: {[key: string]: any}): Result
+                    +execute(parameter: object): Result
                 }
                 interface Post
                 {
-                    +execute(query: {[key: string]: any}, postdata: {[key: string]: any}): Result
+                    +execute(parameter: object, postdata: {[key: string]: any}): Result
                 }
             }
         }
@@ -82,37 +127,6 @@ package "models "
     {
         ENTRY,
         EXIT
-    }
-    class Discord
-    {
-        +<<readonly>>id: string
-        +<<readonly>>nickname: string
-    }
-    class Game
-    {
-        +<<readonly>>title: string
-        +<<readonly>>id: string
-    }
-    class Member
-    {
-        +<<readonly>>id: number
-        +<<readonly>>name: string
-        +<<readonly>>discord: Discord
-        +<<readonly>>games: Game[]
-    }
-    class Room
-    {
-        +{static}<<readonly>>CACHE: RoomCache
-        +<<readonly>>info: RoomInfo
-        +<<readonly>>inmates: Member[]
-        +{static}fromCacheOrDefault(info: RoomInfo): Room
-        +entry(member: Member): void
-        +exit(member: Member): void
-    }
-    class RoomInfo
-    {
-        +<<readonly>>campus: string
-        +<<readonly>>name: string
     }
 }
 package utils
@@ -146,29 +160,35 @@ package utils
     }
 }
 
+Query --|> ID
+Query --|> NameAndCampus
 Endpoint --|> Get
 Endpoint --|> Post
 
-Member .up.|> Response
+Member .up.|> DTO
 Member .up.|> Cacheable
-Room .up.|> Response
+Room .up.|> DTO
 Room .up.|> Cacheable
-Index .up.|> Get
+MemberIndex .up.|> Get
 Entry .up.|> Post
 Exit .up.|> Post
-"Index " .up.|> Get
+RoomIndex .up.|> Get
 
 Member "1" *-- "1" Discord
 Member "1" *-- "*" Game
 Room "1" *-- "1" RoomInfo
 Room "1" *-- "*" Member
-Result "1" *-- "1" Response
+Response "1" *-- "1" DTO
 Route "1" *-- "*" Endpoint
 
 Cache --> Cacheable
 AccessInfo --> Date
 Room --> String
 RoomAccessLogger --> AccessInfo
-Endpoint --> Result
+Endpoint --> Response
+MemberIndex --> ID
+RoomIndex --> NameAndCampus
+
+Response +-- ResultState
 
 @enduml
