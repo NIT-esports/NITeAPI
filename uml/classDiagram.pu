@@ -82,6 +82,10 @@ package api
                 +<<readonly>>discord: Discord
                 +<<readonly>>games: Game[]
             }
+            abstract Response
+            {
+                +toJSON(): object
+            }
             class Room
             {
                 +<<readonly>>info: RoomInfo
@@ -94,10 +98,6 @@ package api
                 +<<readonly>>campus: string
                 +<<readonly>>name: string
             }
-        }
-        interface Response
-        {
-            +toJSON(): object
         }
         class APIResponse
         {
@@ -171,6 +171,8 @@ package utils
 }
 
 DTO --|> Request
+DTO --|> Response
+DTO --|> Query
 Request --|> AccessRequest
 Query --|> ID
 Query --|> NameAndCampus

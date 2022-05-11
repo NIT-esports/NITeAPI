@@ -1,5 +1,3 @@
-export abstract class Query<T> {
-    constructor(partial: Partial<T>) {
-        Object.assign(this, partial);
-    }
-}
+import { DTO } from "..";
+
+export abstract class Query<T> extends DTO<T> { }
