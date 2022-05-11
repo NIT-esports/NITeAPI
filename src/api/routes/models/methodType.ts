@@ -1,10 +1,10 @@
 import { Endpoint } from "."
-import { Response } from "../../models"
+import { APIResponse } from "../../models"
 
 export interface Get extends Endpoint {
-    execute(parameter: object): Response
+    execute(parameter: object): APIResponse
 }
 
 export interface Post extends Endpoint {
-    execute(parameter: object, postdata: { [key: string]: any }): Response
+    execute(parameter: object, postdata: { [key: string]: any }): APIResponse
 }

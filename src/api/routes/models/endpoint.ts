@@ -1,6 +1,6 @@
-import { Response } from "../../models";
+import { APIResponse } from "../../models";
 
 export interface Endpoint {
     path: string;
-    execute(parameter: object, postdata?: { [key: string]: any }): Response
+    execute(parameter: object, postdata?: { [key: string]: any }): APIResponse
 }

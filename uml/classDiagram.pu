@@ -86,17 +86,17 @@ package api
                 +<<readonly>>name: string
             }
         }
-        interface DTO
+        interface Response
         {
             +toJSON(): object
         }
-        class Response
+        class APIResponse
         {
             +<<readonly>>state: ResultState
             +<<readonly>>message: string
-            +<<readonly>>data: DTO
-            +{static}Success(response: DTO): Response
-            +{static}Failed(message: string): Response
+            +<<readonly>>data: Response
+            +{static}Success(response: DTO): APIResponse
+            +{static}Failed(message: string): APIResponse
         }
         enum ResultState
         {
@@ -165,9 +165,9 @@ Query --|> NameAndCampus
 Endpoint --|> Get
 Endpoint --|> Post
 
-Member .up.|> DTO
+Member .up.|> Response
 Member .up.|> Cacheable
-Room .up.|> DTO
+Room .up.|> Response
 Room .up.|> Cacheable
 MemberIndex .up.|> Get
 Entry .up.|> Post
@@ -178,17 +178,17 @@ Member "1" *-- "1" Discord
 Member "1" *-- "*" Game
 Room "1" *-- "1" RoomInfo
 Room "1" *-- "*" Member
-Response "1" *-- "1" DTO
+APIResponse "1" *-- "1" Response
 Route "1" *-- "*" Endpoint
 
 Cache --> Cacheable
 AccessInfo --> Date
 Room --> String
 RoomAccessLogger --> AccessInfo
-Endpoint --> Response
+Endpoint --> APIResponse
 MemberIndex --> ID
 RoomIndex --> NameAndCampus
 
-Response +-- ResultState
+APIResponse +-- ResultState
 
 @enduml
