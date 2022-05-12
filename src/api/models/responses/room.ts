@@ -85,7 +85,7 @@ export class Room extends Response<Room> implements Cacheable<Room> {
     const spreadsheet = SpreadsheetApp.openById(id);
     const range = spreadsheet.getRangeByName("Inmates");
     const sheet = range.getSheet();
-    const index = room.inmates.findIndex((value) => value == member) + 5;
+    const index = room.inmates.findIndex((value) => value.id == member.id) + 5;
     sheet.deleteRow(index);
   }
 }
