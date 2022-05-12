@@ -16,6 +16,7 @@ export class AccessInfo {
 
   toLog(): string[] {
     return [
+      "",
       this.member.id.toString(),
       this.member.name,
       this.room.name,

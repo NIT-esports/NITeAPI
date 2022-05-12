@@ -34,7 +34,7 @@ package api
                 EXIT
             }
         }
-        class RoomAccessLogger
+        class AccessLogger
         {
             +{static}log(context: AccessInfo): void
         }

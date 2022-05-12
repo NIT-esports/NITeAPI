@@ -1,11 +1,10 @@
-import { RoomAccessLogger } from "../../logger";
-import { AccessInfo, AccessType } from "../../logger/models";
 import { Cache } from "../../caches";
 import { APIResponse } from "../../models";
 import { NameAndCampus } from "../../models/queries/nameAndCampus";
 import { Room, Member, RoomInfo } from "../../models/responses";
 import { Get, Post } from "../models/methodType";
 import { AccessRequest } from "../../models/requests";
+import { AccessInfo, AccessType, AccessLogger } from "../../logger";
 
 export namespace RoomController {
     export class Index implements Get {
@@ -50,7 +49,7 @@ export namespace RoomController {
                 if (room.inmates.some((inmate) => inmate.id == member.id)) {
                     room.entry(member);
                     Cache.make<Room>(Room);
-                    RoomAccessLogger.log(accessInfo);
+                    AccessLogger.log(accessInfo);
                     return APIResponse.Success(null);
                 }
                 return APIResponse.Failed("Already entered the room");
@@ -82,7 +81,7 @@ export namespace RoomController {
                 if (room.inmates.some((inmate) => inmate.id == member.id)) {
                     room.exit(member);
                     Cache.make<Room>(Room);
-                    RoomAccessLogger.log(accessInfo);
+                    AccessLogger.log(accessInfo);
                     return APIResponse.Success(null);
                 }
                 return APIResponse.Failed("Already exited the room");
