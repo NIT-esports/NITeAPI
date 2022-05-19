@@ -1,2 +1,3 @@
 export { AccessRequest } from "./accessRequest"
-export { Request } from "./request"
+export { RegisterMember } from "./registerMember"
+export { UpdatedNickname } from "./updatedNickname"

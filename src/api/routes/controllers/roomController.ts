@@ -45,8 +45,8 @@ export namespace RoomController {
                 const accessInfo = new AccessInfo(info, member, AccessType.ENTRY);
                 const room = Cache.getOrMake<Room>(Room).find((room) => {
                     return room.info.campus == info.campus && room.info.name == info.name;
-                });
-                if (room.inmates.some((inmate) => inmate.id == member.id)) {
+                }) || new Room(info, []);
+                if (!room.inmates.some((inmate) => inmate.id == member.id)) {
                     room.entry(member);
                     Cache.make<Room>(Room);
                     AccessLogger.log(accessInfo);
@@ -78,7 +78,7 @@ export namespace RoomController {
                 const room = Cache.getOrMake<Room>(Room).find((room) => {
                     return room.info.campus == info.campus && room.info.name == info.name;
                 });
-                if (room.inmates.some((inmate) => inmate.id == member.id)) {
+                if (room && room.inmates.some((inmate) => inmate.id == member.id)) {
                     room.exit(member);
                     Cache.make<Room>(Room);
                     AccessLogger.log(accessInfo);
