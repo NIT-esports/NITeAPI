@@ -1,7 +1,10 @@
+import { Cache } from "./api/caches";
+import { Member, Room } from "./api/models/responses";
 import { Route } from "./api/routes";
 
-function getToken() {
-  console.log(ScriptApp.getOAuthToken());
+function doEvery6Hours() {
+  Cache.make<Member>(Member);
+  Cache.make<Room>(Room);
 }
 
 function toJson(data: any) {
