@@ -62,6 +62,16 @@ package api
                 +id: string
                 +place: { campus: string, name: string }
             }
+            class RegisterMember
+            {
+                +id: number
+                +name: string
+                +discord: Discord
+            }
+            class UpdatedNickname
+            {
+                +nickname: string
+            }
         }
         package responses
         {
@@ -121,6 +131,8 @@ package api
             package MemberController
             {
                 class "Index" as MemberIndex
+                class Update
+                class Register
             }
             package RoomController
             {
@@ -174,6 +186,8 @@ DTO --|> Request
 DTO --|> Response
 DTO --|> Query
 Request --|> AccessRequest
+Request --|> RegisterMember
+Request --|> UpdatedNickname
 Query --|> ID
 Query --|> NameAndCampus
 Endpoint --|> Get
@@ -184,6 +198,8 @@ Member .up.|> Cacheable
 Room .up.|> Response
 Room .up.|> Cacheable
 MemberIndex .up.|> Get
+Update .up.|> Post
+Register .up.|> Post
 Entry .up.|> Post
 Exit .up.|> Post
 RoomIndex .up.|> Get
@@ -201,6 +217,9 @@ Room --> String
 RoomAccessLogger --> AccessInfo
 Endpoint --> APIResponse
 MemberIndex --> ID
+Update --> ID
+Update --> UpdatedNickname
+Register --> RegisterMember
 RoomIndex --> NameAndCampus
 Entry --> AccessRequest
 Exit --> AccessRequest
