@@ -1,72 +1,168 @@
 @startuml
-package models
+package api
 {
-    class AccessInfo
+    package caches
     {
-        +<<readonly>>room: RoomInfo
-        +<<readonly>>member: Member
-        +<<readonly>>type: AccessType
-        +<<readonly>>time: Date
+        class Cache
+        {
+            +{static}get<T extends Cacheable<T>>(): T[]
+            +{static}getOrMake<T extends Cacheable<T>>(): T[]
+            +{static}make<T extends Cacheable<T>>(): T[]
+        }
+        interface Cacheable<T>
+        {
+            +<<readonly>>key: string
+            +<<readonly>>cacheSourceSheetID: string
+            +fromSpreadsheet(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): T[]
+            +toInstances(cached: object[]): T[]
+        }
     }
-    enum AccessType
+    package logger
     {
-        ENTRY,
-        EXIT
+        package "models "
+        {
+            class AccessInfo
+            {
+                +<<readonly>>room: RoomInfo
+                +<<readonly>>member: Member
+                +<<readonly>>type: AccessType
+                +<<readonly>>time: Date
+            }
+            enum AccessType
+            {
+                ENTRY,
+                EXIT
+            }
+        }
+        class AccessLogger
+        {
+            +{static}log(context: AccessInfo): void
+        }
     }
-    class Discord
+    package models
     {
-        +<<readonly>>id: string
-        +<<readonly>>nickname: string
+        package queries
+        {
+            class ID
+            {
+                +id: string
+            }
+            class NameAndCampus
+            {
+                +name: string
+                +campus: string
+            }
+        }
+        package requests
+        {
+            class AccessRequest
+            {
+                +id: string
+                +place: { campus: string, name: string }
+            }
+            class RegisterMember
+            {
+                +id: number
+                +name: string
+                +discord: Discord
+            }
+            class UpdatedNickname
+            {
+                +nickname: string
+            }
+        }
+        package responses
+        {
+            class Discord
+            {
+                +<<readonly>>id: string
+                +<<readonly>>nickname: string
+            }
+            class Game
+            {
+                +<<readonly>>title: string
+                +<<readonly>>id: string
+            }
+            class Member
+            {
+                +<<readonly>>id: number
+                +<<readonly>>name: string
+                +<<readonly>>discord: Discord
+                +<<readonly>>games: Game[]
+            }
+            abstract Response
+            {
+                +toJSON(): object
+            }
+            class Room
+            {
+                +<<readonly>>info: RoomInfo
+                +<<readonly>>inmates: Member[]
+                +entry(member: Member): void
+                +exit(member: Member): void
+            }
+            class RoomInfo
+            {
+                +<<readonly>>campus: string
+                +<<readonly>>name: string
+            }
+        }
+        class APIResponse
+        {
+            +<<readonly>>state: ResultState
+            +<<readonly>>message: string
+            +<<readonly>>data: Response<any> || Response<any>[]
+            +{static}Success(response: Response<any> || Response<any>[]): APIResponse
+            +{static}Failed(message: string): APIResponse
+        }
+        abstract DTO<T>
+        enum ResultState
+        {
+            SUCCESS,
+            FAILED
+        }
     }
-    class Game
+    package routes
     {
-        +<<readonly>>title: string
-        +<<readonly>>id: string
-    }
-    class Member
-    {
-        +<<readonly>>id: number
-        +<<readonly>>name: string
-        +<<readonly>>discord: Discord
-        +<<readonly>>games: Game[]
-    }
-    interface Responce
-    {
-        +toJSON(): object
-    }
-    class Result
-    {
-        +<<readonly>>state: ResultState
-        +<<readonly>>message: string
-        +<<readonly>>data: Responce
-    }
-    enum ResultState
-    {
-        SUCCESS,
-        FAILED
-    }
-    class Room
-    {
-        +<<readonly>>info: RoomInfo
-        +<<readonly>>inmates: Member[]
-        +entry(member: Member): void
-        +exit(member: Member): void
-    }
-    class RoomInfo
-    {
-        +<<readonly>>campus: string
-        +<<readonly>>name: string
-    }
-}
-package controllers
-{
-    class MembersList
-    {
-
-    }
-    class RoomAccessLogger
-    {
-        +{static}log(context: AccessInfo): void
+        package controllers
+        {
+            package MemberController
+            {
+                class "Index" as MemberIndex
+                class Update
+                class Register
+            }
+            package RoomController
+            {
+                class "Index " as RoomIndex
+                class Entry
+                class Exit
+            }
+        }
+        package " models"
+        {
+            interface Endpoint
+            {
+                +path: string
+                +execute(parameter: object, postdata?: {[key: string]: any}): Result
+            }
+            package MethodType
+            {
+                interface Get
+                {
+                    +execute(parameter: object): Result
+                }
+                interface Post
+                {
+                    +execute(parameter: object, postdata: {[key: string]: any}): Result
+                }
+            }
+        }
+        class Route
+        {
+            {static}<<readonly>>_routes: Endpoint[]
+            +{static}get(path: string): Endpoint
+        }
     }
 }
 package utils
@@ -84,18 +180,54 @@ package utils
     }
 }
 
-Member ..|> Responce
-Room ..|> Responce
+Response -up-|> DTO
+Member -up-|> Response
+Room -up-|> Response
+AccessRequest -up-|> DTO
+RegisterMember -up-|> DTO
+UpdatedNickname --|> DTO
+ID -up-|> DTO
+NameAndCampus -up-|> DTO
+Get --|> Endpoint
+Post --|> Endpoint
+
+Member ..|> Cacheable
+Room ..|> Cacheable
+MemberIndex ..|> Get
+Update ..|> Post
+Register ..|> Post
+Entry ..|> Post
+Exit ..|> Post
+RoomIndex ..|> Get
 
 Member "1" *-- "1" Discord
 Member "1" *-- "*" Game
 Room "1" *-- "1" RoomInfo
 Room "1" *-- "*" Member
-Result "1" *-- "1" Responce
+APIResponse "1" *-- "1" Response
+Route "1" *-- "*" Endpoint
 
+Cache -up-> Cacheable
 AccessInfo --> Date
-MembersList --> Member
 Room --> String
-RoomAccessLogger --> AccessInfo
+AccessLogger --> AccessInfo
+Endpoint --> APIResponse
+MemberIndex --> ID
+MemberIndex -up-> Cache
+Update -up> ID
+Update -up-> UpdatedNickname
+Update -up-> Cache
+Register -up-> RegisterMember
+Register -up-> Cache
+RoomIndex -up-> NameAndCampus
+RoomIndex -up-> Cache
+Entry -up-> AccessRequest
+Entry -up-> AccessLogger
+Entry -up-> Cache
+Exit -up-> AccessRequest
+Exit -up-> AccessLogger
+Exit -up-> Cache
+
+APIResponse +-- ResultState
 
 @enduml

@@ -1,4 +1,5 @@
-import { AccessType, Member, RoomInfo } from ".";
+import { AccessType } from ".";
+import { RoomInfo, Member } from "../../models/responses";
 
 export class AccessInfo {
   room: RoomInfo;
@@ -15,6 +16,7 @@ export class AccessInfo {
 
   toLog(): string[] {
     return [
+      "",
       this.member.id.toString(),
       this.member.name,
       this.room.name,
