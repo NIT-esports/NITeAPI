@@ -1,7 +1,7 @@
+import { DTO } from "..";
 import { Discord } from "../responses";
-import { Request } from "./request";
 
-export class RegisterMember extends Request<RegisterMember> {
+export class RegisterMember extends DTO<RegisterMember> {
     id: number;
     name: string;
     discord: Discord;

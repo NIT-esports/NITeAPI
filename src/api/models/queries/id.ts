@@ -1,5 +1,5 @@
-import { Query } from ".";
+import { DTO } from "..";
 
-export class ID extends Query<ID> {
+export class ID extends DTO<ID> {
     id: string
 }

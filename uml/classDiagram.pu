@@ -52,11 +52,9 @@ package api
                 +name: string
                 +campus: string
             }
-            abstract Query<T>
         }
         package requests
         {
-            abstract Request<T>
             class AccessRequest
             {
                 +id: string
@@ -182,27 +180,25 @@ package utils
     }
 }
 
-DTO --|> Request
-DTO --|> Response
-DTO --|> Query
-Request --|> AccessRequest
-Request --|> RegisterMember
-Request --|> UpdatedNickname
-Query --|> ID
-Query --|> NameAndCampus
-Endpoint --|> Get
-Endpoint --|> Post
+Response -up-|> DTO
+Member -up-|> Response
+Room -up-|> Response
+AccessRequest -up-|> DTO
+RegisterMember -up-|> DTO
+UpdatedNickname --|> DTO
+ID -up-|> DTO
+NameAndCampus -up-|> DTO
+Get --|> Endpoint
+Post --|> Endpoint
 
-Member .up.|> Response
-Member .up.|> Cacheable
-Room .up.|> Response
-Room .up.|> Cacheable
-MemberIndex .up.|> Get
-Update .up.|> Post
-Register .up.|> Post
-Entry .up.|> Post
-Exit .up.|> Post
-RoomIndex .up.|> Get
+Member ..|> Cacheable
+Room ..|> Cacheable
+MemberIndex ..|> Get
+Update ..|> Post
+Register ..|> Post
+Entry ..|> Post
+Exit ..|> Post
+RoomIndex ..|> Get
 
 Member "1" *-- "1" Discord
 Member "1" *-- "*" Game
@@ -211,18 +207,26 @@ Room "1" *-- "*" Member
 APIResponse "1" *-- "1" Response
 Route "1" *-- "*" Endpoint
 
-Cache --> Cacheable
+Cache -up-> Cacheable
 AccessInfo --> Date
 Room --> String
-RoomAccessLogger --> AccessInfo
+AccessLogger --> AccessInfo
 Endpoint --> APIResponse
 MemberIndex --> ID
-Update --> ID
-Update --> UpdatedNickname
-Register --> RegisterMember
-RoomIndex --> NameAndCampus
-Entry --> AccessRequest
-Exit --> AccessRequest
+MemberIndex -up-> Cache
+Update -up> ID
+Update -up-> UpdatedNickname
+Update -up-> Cache
+Register -up-> RegisterMember
+Register -up-> Cache
+RoomIndex -up-> NameAndCampus
+RoomIndex -up-> Cache
+Entry -up-> AccessRequest
+Entry -up-> AccessLogger
+Entry -up-> Cache
+Exit -up-> AccessRequest
+Exit -up-> AccessLogger
+Exit -up-> Cache
 
 APIResponse +-- ResultState
 

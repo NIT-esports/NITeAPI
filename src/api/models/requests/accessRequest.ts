@@ -1,6 +1,6 @@
-import { Request } from "./request";
+import { DTO } from "..";
 
-export class AccessRequest extends Request<AccessRequest> {
+export class AccessRequest extends DTO<AccessRequest> {
     id: string;
     place: { campus: string, name: string }
 }

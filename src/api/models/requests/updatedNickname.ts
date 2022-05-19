@@ -1,5 +1,5 @@
-import { Request } from "./request";
+import { DTO } from "..";
 
-export class UpdatedNickname extends Request<UpdatedNickname> {
+export class UpdatedNickname extends DTO<UpdatedNickname> {
     nickname: string;
 }
