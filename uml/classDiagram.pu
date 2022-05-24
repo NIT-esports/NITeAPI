@@ -78,6 +78,10 @@ package api
                 +<<readonly>>id: string
                 +<<readonly>>nickname: string
             }
+            class Error 
+            {
+                +message: string
+            }
             class Game
             {
                 +<<readonly>>title: string
@@ -90,6 +94,7 @@ package api
                 +<<readonly>>discord: Discord
                 +<<readonly>>games: Game[]
             }
+            class NoneResponse 
             abstract Response
             {
                 +toJSON(): object
@@ -107,20 +112,7 @@ package api
                 +<<readonly>>name: string
             }
         }
-        class APIResponse
-        {
-            +<<readonly>>state: ResultState
-            +<<readonly>>message: string
-            +<<readonly>>data: Response<any> || Response<any>[]
-            +{static}Success(response: Response<any> || Response<any>[]): APIResponse
-            +{static}Failed(message: string): APIResponse
-        }
         abstract DTO<T>
-        enum ResultState
-        {
-            SUCCESS,
-            FAILED
-        }
     }
     package routes
     {
@@ -141,20 +133,20 @@ package api
         }
         package " models"
         {
-            interface Endpoint
+            interface Endpoint<Success extends Response>
             {
                 +path: string
-                +execute(parameter: object, postdata?: {[key: string]: any}): Result
+                +execute(parameter: object, postdata?: {[key: string]: any}): Success | Success[] | Error
             }
             package MethodType
             {
-                interface Get
+                interface Get<Success extends Response>
                 {
-                    +execute(parameter: object): Result
+                    +execute(parameter: object): Success | Success[] | Error
                 }
-                interface Post
+                interface Post<Success extends Response>
                 {
-                    +execute(parameter: object, postdata: {[key: string]: any}): Result
+                    +execute(parameter: object, postdata: {[key: string]: any}): Success | Success[] | Error
                 }
             }
         }
@@ -183,6 +175,8 @@ package utils
 Response -up-|> DTO
 Member -up-|> Response
 Room -up-|> Response
+Error -up-|> Response
+NoneResponse -up-|> Response
 AccessRequest -up-|> DTO
 RegisterMember -up-|> DTO
 UpdatedNickname --|> DTO
@@ -204,14 +198,13 @@ Member "1" *-- "1" Discord
 Member "1" *-- "*" Game
 Room "1" *-- "1" RoomInfo
 Room "1" *-- "*" Member
-APIResponse "1" *-- "1" Response
 Route "1" *-- "*" Endpoint
 
 Cache -up-> Cacheable
 AccessInfo --> Date
 Room --> String
 AccessLogger --> AccessInfo
-Endpoint --> APIResponse
+Endpoint --> Response
 MemberIndex --> ID
 MemberIndex -up-> Cache
 Update -up> ID
@@ -228,6 +221,5 @@ Exit -up-> AccessRequest
 Exit -up-> AccessLogger
 Exit -up-> Cache
 
-APIResponse +-- ResultState
 
 @enduml
