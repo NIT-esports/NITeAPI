@@ -16,7 +16,7 @@ export namespace MemberController {
         execute(parameter: object): Member | Error {
             const cached = Cache.getOrMake<Member>(Member);
             const query = new ID(parameter);
-            const member = cached.find((member) => member.id?.toString() == query.id);
+            const member = cached.find((member) => member.id?.toString() == query.id || member.discord?.id == query.id);
             return member || new Error(Utilities.formatString("The member with id %s did not exist", query.id));
         }
     }
